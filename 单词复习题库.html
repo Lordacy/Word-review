@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单词总复习题库</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --line:#e5e7eb; --text:#1f2328; --sub:#6b7280;
+  --accent:#2563eb; --accent-soft:#eaf1ff; --ok:#16a34a; --ok-soft:#e8f7ee;
+  --bad:#dc2626; --bad-soft:#fdecec; --warn:#d97706; --warn-soft:#fff5e6;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.6}
+.wrap{max-width:840px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:21px;margin:0;letter-spacing:.5px}
+.sub{color:var(--sub);font-size:13px}
+.chip-stat{display:inline-flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:4px 12px;font-size:13px;color:var(--sub)}
+.chip-stat b{color:var(--text)}
+nav.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:16px}
+nav.tabs button{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:8px;font-size:14px;
+  color:var(--sub);cursor:pointer;font-family:inherit}
+nav.tabs button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.panel h2{font-size:15px;margin:0 0 12px;color:var(--text)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lab{font-size:13px;color:var(--sub);min-width:52px}
+.opt{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font-size:13px;
+  cursor:pointer;color:var(--text);font-family:inherit;transition:.15s}
+.opt:hover{border-color:var(--accent);color:var(--accent)}
+.opt.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.group-list{display:flex;flex-wrap:wrap;gap:8px}
+.btn-main{display:block;width:100%;margin-top:16px;background:var(--accent);color:#fff;border:0;border-radius:12px;
+  padding:13px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-main:disabled{opacity:.45;cursor:not-allowed}
+.btn-line{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 16px;font-size:14px;
+  cursor:pointer;color:var(--text);font-family:inherit}
+.btn-line:hover{border-color:var(--accent);color:var(--accent)}
+
+/* quiz */
+.bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:.3s}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:14px}
+.qtype{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;
+  padding:1px 8px;font-size:12px;margin-bottom:14px}
+.stem{font-size:30px;font-weight:700;letter-spacing:.5px;text-align:center;margin:18px 0 6px;word-break:break-word}
+.stem.small{font-size:20px;line-height:1.5;font-weight:600}
+.hint{text-align:center;color:var(--sub);font-size:13px;margin-bottom:18px}
+.options{display:grid;gap:10px}
+.option{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:#fff;cursor:pointer;
+  font-size:15px;text-align:left;font-family:inherit;color:var(--text);transition:.12s;display:flex;gap:10px}
+.option:hover:not(.done){border-color:var(--accent);background:#fafcff}
+.option .k{color:var(--sub);font-size:13px;min-width:16px}
+.option.right{border-color:var(--ok);background:var(--ok-soft)}
+.option.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.option.done{cursor:default}
+.answerline{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:17px;
+  font-family:inherit;outline:none;text-align:center;letter-spacing:1px}
+.answerline:focus{border-color:var(--accent)}
+.fb{margin-top:14px;border-radius:12px;padding:12px 14px;font-size:14px;display:none;line-height:1.7}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-soft);color:#146c34}
+.fb.bad{background:var(--bad-soft);color:#a51b1b}
+.fb .big{font-weight:700;font-size:17px;letter-spacing:.5px}
+.after{margin-top:14px;text-align:right}
+.speak{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;
+  font-size:14px;font-family:inherit}
+.hide{display:none!important}
+
+/* result */
+.score{font-size:44px;font-weight:800;text-align:center;color:var(--accent);line-height:1.2}
+.scorebox{text-align:center;margin-bottom:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;text-align:center}
+.grid3 div{background:#fafbfc;border:1px solid var(--line);border-radius:10px;padding:10px 4px}
+.grid3 b{display:block;font-size:18px}
+.grid3 span{font-size:12px;color:var(--sub)}
+.wrong-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:14px}
+.wrong-item .w{font-weight:700}
+.wrong-item .m{color:var(--sub)}
+
+/* flashcard */
+.fcard{border:1px solid var(--line);border-radius:16px;padding:34px 20px;text-align:center;background:#fff;
+  min-height:190px;display:flex;flex-direction:column;justify-content:center;cursor:pointer}
+.fcard .fw{font-size:34px;font-weight:700}
+.fcard .fm{font-size:19px;color:var(--text)}
+.fcard .tip{color:var(--sub);font-size:13px;margin-top:10px}
+
+/* word list */
+.search{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;
+  font-family:inherit;outline:none;margin-bottom:12px}
+.gtitle{font-size:13px;color:var(--sub);margin:14px 0 6px;display:flex;justify-content:space-between}
+table.wt{width:100%;border-collapse:collapse;font-size:14px}
+table.wt td{border-bottom:1px solid var(--line);padding:7px 6px;vertical-align:top}
+table.wt td.w{width:34%;font-weight:600}
+td .dot{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;vertical-align:1px}
+.dot.m{background:var(--ok)}.dot.b{background:var(--bad)}.dot.n{background:#d1d5db}
+.pbar{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.pbar>i{display:block;height:100%;background:var(--ok)}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:14px}
+.stat-row .nm{width:120px;color:var(--sub);font-size:13px}
+.stat-row .pb{flex:1}
+.stat-row .vv{width:52px;text-align:right;font-size:13px;color:var(--sub)}
+.foot{text-align:center;color:var(--sub);font-size:12px;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>单词总复习题库</h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <div>
+      <span class="chip-stat">已掌握 <b id="s-master">0</b></span>
+      <span class="chip-stat">错题 <b id="s-wrong">0</b></span>
+      <span class="chip-stat">正确率 <b id="s-acc">--</b></span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="on" data-tab="home">练习</button>
+    <button data-tab="flash">闪卡</button>
+    <button data-tab="list">词表</button>
+    <button data-tab="stat">统计</button>
+  </nav>
+
+  <!-- 首页：设置 -->
+  <section id="tab-home">
+    <div class="panel">
+      <h2>选择范围</h2>
+      <div class="row" style="margin-bottom:10px">
+        <span class="lab">模式</span>
+        <button class="opt on" data-scope="all">全部单词</button>
+        <button class="opt" data-scope="group">指定分组</button>
+        <button class="opt" data-scope="wrong">只看错词</button>
+        <button class="opt" data-scope="new">只看未掌握</button>
+      </div>
+      <div class="group-list hide" id="groupBox"></div>
+      <div class="sub" id="scopeInfo" style="margin-top:10px"></div>
+    </div>
+
+    <div class="panel">
+      <h2>题型</h2>
+      <div class="row">
+        <button class="opt on" data-type="mix">混合</button>
+        <button class="opt" data-type="en2cn">英 → 中</button>
+        <button class="opt" data-type="cn2en">中 → 英</button>
+        <button class="opt" data-type="spell">拼写填空</button>
+        <button class="opt" data-type="listen">听音拼写</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>题量</h2>
+      <div class="row">
+        <button class="opt" data-n="10">10 题</button>
+        <button class="opt on" data-n="20">20 题</button>
+        <button class="opt" data-n="50">50 题</button>
+        <button class="opt" data-n="999">全部</button>
+      </div>
+    </div>
+    <button class="btn-main" id="startBtn">开始练习</button>
+  </section>
+
+  <!-- 答题 -->
+  <section id="tab-quiz" class="hide">
+    <div class="panel">
+      <div class="bar"><i id="qbar"></i></div>
+      <div class="meta"><span id="qnum"></span><span id="qscore"></span></div>
+      <div><span class="qtype" id="qtype"></span></div>
+      <div class="stem" id="stem"></div>
+      <div class="hint" id="hint"></div>
+      <div id="area"></div>
+      <div class="fb" id="fb"></div>
+      <div class="after hide" id="after"><button class="btn-line" id="nextBtn">下一题 →</button></div>
+    </div>
+    <div style="text-align:center"><button class="btn-line" id="quitBtn">结束练习</button></div>
+  </section>
+
+  <!-- 结果 -->
+  <section id="tab-result" class="hide">
+    <div class="panel">
+      <div class="scorebox">
+        <div class="score" id="rscore">0</div>
+        <div class="sub">本次得分（每题 100 分）</div>
+      </div>
+      <div class="grid3">
+        <div><b id="rtotal">0</b><span>题数</span></div>
+        <div><b id="rright">0</b><span>答对</span></div>
+        <div><b id="racc">0%</b><span>正确率</span></div>
+      </div>
+      <div id="rwrong"></div>
+      <div class="row" style="margin-top:18px;justify-content:center">
+        <button class="btn-line" id="ragain">再来一组</button>
+        <button class="btn-line" id="ronlywrong">只练本次错词</button>
+        <button class="btn-line" id="rhome">返回</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 闪卡 -->
+  <section id="tab-flash" class="hide">
+    <div class="panel">
+      <div class="row" style="margin-bottom:12px">
+        <span class="lab">范围</span>
+        <div class="group-list" id="flashGroups"></div>
+      </div>
+      <div class="fcard" id="fcard"><div class="fw" id="fw"></div><div class="tip">点击翻面</div></div>
+      <div class="row" style="margin-top:14px;justify-content:center">
+        <button class="btn-line" id="fprev">← 上一个</button>
+        <button class="speak" id="fspeak">🔊 朗读</button>
+        <button class="btn-line" id="fknow">✓ 认识</button>
+        <button class="btn-line" id="funknow">✗ 不认识</button>
+        <button class="btn-line" id="fnext">下一个 →</button>
+      </div>
+      <div class="sub" id="finfo" style="text-align:center;margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- 词表 -->
+  <section id="tab-list" class="hide">
+    <div class="panel">
+      <input class="search" id="search" placeholder="搜索单词或中文释义…">
+      <div id="listBox"></div>
+    </div>
+  </section>
+
+  <!-- 统计 -->
+  <section id="tab-stat" class="hide">
+    <div class="panel">
+      <h2>各组掌握进度</h2>
+      <div id="statBox"></div>
+    </div>
+    <div class="panel">
+      <h2>错误次数排行</h2>
+      <div id="topWrong"></div>
+    </div>
+    <div class="panel">
+      <h2>数据</h2>
+      <div class="row">
+        <button class="btn-line" id="resetBtn">清空学习记录</button>
+        <button class="btn-line" id="exportBtn">导出错词表</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">共 <b id="totalN">0</b> 个单词 · 记录保存在本机浏览器</div>
+</div>
+
+<script>
+const WORDS = [
+ {
+  "w": "antagonist",
+  "m": "对手",
+  "g": "Lesson7 P71",
+  "id": 0
+ },
+ {
+  "w": "batter",
+  "m": "连续猛击；殴打",
+  "g": "Lesson7 P71",
+  "id": 1
+ },
+ {
+  "w": "bona-fide",
+  "m": "真实的，真诚的",
+  "g": "Lesson7 P71",
+  "id": 2
+ },
+ {
+  "w": "conjure",
+  "m": "（如用魔力般）使……产生",
+  "g": "Lesson7 P71",
+  "id": 3
+ },
+ {
+  "w": "constituency",
+  "m": "选区；选民",
+  "g": "Lesson7 P71",
+  "id": 4
+ },
+ {
+  "w": "demographic",
+  "m": "人口统计的",
+  "g": "Lesson7 P71",
+  "id": 5
+ },
+ {
+  "w": "contention",
+  "m": "论点",
+  "g": "Lesson7 P71",
+  "id": 6
+ },
+ {
+  "w": "deport",
+  "m": "驱逐出境",
+  "g": "Lesson7 P71",
+  "id": 7
+ },
+ {
+  "w": "Gov.",
+  "m": "州长（governor 的缩写/全称）",
+  "g": "Lesson7 P71",
+  "id": 8
+ },
+ {
+  "w": "harassed",
+  "m": "烦恼的，疲惫不堪的",
+  "g": "Lesson7 P71",
+  "id": 9
+ },
+ {
+  "w": "illuminate",
+  "m": "阐明，使清楚易懂",
+  "g": "Lesson7 P71",
+  "id": 10
+ },
+ {
+  "w": "marijuana",
+  "m": "大麻",
+  "g": "Lesson7 P71",
+  "id": 11
+ },
+ {
+  "w": "malleable",
+  "m": "可塑的；易适应的",
+  "g": "Lesson7 P71",
+  "id": 12
+ },
+ {
+  "w": "mandate",
+  "m": "（给代表的）授权",
+  "g": "Lesson7 P71",
+  "id": 13
+ },
+ {
+  "w": "Mormon",
+  "m": "摩门教徒",
+  "g": "Lesson7 P71",
+  "id": 14
+ },
+ {
+  "w": "oblique",
+  "m": "拐弯抹角的，间接的",
+  "g": "Lesson7 P71",
+  "id": 15
+ },
+ {
+  "w": "plaudit",
+  "m": "喝彩；赞扬",
+  "g": "Lesson7 P71",
+  "id": 16
+ },
+ {
+  "w": "plunge",
+  "m": "纵身投入，猛跌；使突然陷入或遭受",
+  "g": "Lesson7 P71",
+  "id": 17
+ },
+ {
+  "w": "animus",
+  "m": "敌意，憎恨",
+  "g": "第二张图",
+  "id": 18
+ },
+ {
+  "w": "apocalyptic",
+  "m": "预示大动乱或大灾变的；预示世界末日恐怖景象的",
+  "g": "第二张图",
+  "id": 19
+ },
+ {
+  "w": "authentic",
+  "m": "真实的；可靠的",
+  "g": "第二张图",
+  "id": 20
+ },
+ {
+  "w": "blueprint",
+  "m": "蓝图；行动方案",
+  "g": "第二张图",
+  "id": 21
+ },
+ {
+  "w": "brainwashing",
+  "m": "洗脑",
+  "g": "第二张图",
+  "id": 22
+ },
+ {
+  "w": "calculate",
+  "m": "推测，盘算",
+  "g": "第二张图",
+  "id": 23
+ },
+ {
+  "w": "channel",
+  "m": "引导，输送",
+  "g": "第二张图",
+  "id": 24
+ },
+ {
+  "w": "comparable",
+  "m": "可比较的，类似的",
+  "g": "第二张图",
+  "id": 25
+ },
+ {
+  "w": "craft",
+  "m": "精心制作",
+  "g": "第二张图",
+  "id": 26
+ },
+ {
+  "w": "demagogic",
+  "m": "蛊惑人心的",
+  "g": "第二张图",
+  "id": 27
+ },
+ {
+  "w": "demoralize",
+  "m": "使士气低落",
+  "g": "第二张图",
+  "id": 28
+ },
+ {
+  "w": "dilute",
+  "m": "削弱；冲淡",
+  "g": "第二张图",
+  "id": 29
+ },
+ {
+  "w": "egregious",
+  "m": "惊人的，恶劣的",
+  "g": "第二张图",
+  "id": 30
+ },
+ {
+  "w": "elevate",
+  "m": "提升，抬高",
+  "g": "第二张图",
+  "id": 31
+ },
+ {
+  "w": "emulate",
+  "m": "努力赶上或超过；仿效，模仿",
+  "g": "第二张图",
+  "id": 32
+ },
+ {
+  "w": "engage",
+  "m": "参与",
+  "g": "第二张图",
+  "id": 33
+ },
+ {
+  "w": "expedient",
+  "m": "权宜之计的；出于私利考虑的",
+  "g": "第二张图",
+  "id": 34
+ },
+ {
+  "w": "exploit",
+  "m": "剥削；利用",
+  "g": "Lesson12 P133",
+  "id": 35
+ },
+ {
+  "w": "extirpate",
+  "m": "灭绝；根除",
+  "g": "Lesson12 P133",
+  "id": 36
+ },
+ {
+  "w": "fanatic",
+  "m": "狂热者",
+  "g": "Lesson12 P133",
+  "id": 37
+ },
+ {
+  "w": "harass",
+  "m": "骚扰，扰乱；烦扰",
+  "g": "Lesson12 P133",
+  "id": 38
+ },
+ {
+  "w": "hysteria",
+  "m": "歇斯底里，情绪失控",
+  "g": "Lesson12 P133",
+  "id": 39
+ },
+ {
+  "w": "implement",
+  "m": "实施，执行",
+  "g": "Lesson12 P133",
+  "id": 40
+ },
+ {
+  "w": "imprecise",
+  "m": "不精确的，模糊的",
+  "g": "Lesson12 P133",
+  "id": 41
+ },
+ {
+  "w": "incarcerate",
+  "m": "监禁；囿于",
+  "g": "Lesson12 P133",
+  "id": 42
+ },
+ {
+  "w": "instinctive",
+  "m": "本能的；天性的；直觉的",
+  "g": "Lesson12 P133",
+  "id": 43
+ },
+ {
+  "w": "intimidate",
+  "m": "恫吓；威胁",
+  "g": "Lesson12 P133",
+  "id": 44
+ },
+ {
+  "w": "lurking",
+  "m": "潜在的，隐藏的",
+  "g": "Lesson12 P133",
+  "id": 45
+ },
+ {
+  "w": "mantra",
+  "m": "祷文；咒符",
+  "g": "Lesson12 P133",
+  "id": 46
+ },
+ {
+  "w": "menace",
+  "m": "威胁，恐吓",
+  "g": "Lesson12 P133",
+  "id": 47
+ },
+ {
+  "w": "mentality",
+  "m": "智能；心态；思维方式",
+  "g": "Lesson12 P133",
+  "id": 48
+ },
+ {
+  "w": "mobilize",
+  "m": "动员，调动",
+  "g": "Lesson12 P133",
+  "id": 49
+ },
+ {
+  "w": "moderate",
+  "m": "持温和观点者；稳健派",
+  "g": "Lesson12 P133",
+  "id": 50
+ },
+ {
+  "w": "momentum",
+  "m": "动力，势头",
+  "g": "Lesson12 P133",
+  "id": 51
+ },
+ {
+  "w": "monger",
+  "m": "贩卖；兜售",
+  "g": "Lesson12 P133",
+  "id": 52
+ },
+ {
+  "w": "muted",
+  "m": "温和的；（争吵等）已趋缓和的",
+  "g": "Lesson12 P133",
+  "id": 53
+ },
+ {
+  "w": "non-combatant",
+  "m": "（战争时期的）平民",
+  "g": "Lesson12 P133",
+  "id": 54
+ },
+ {
+  "w": "obscure",
+  "m": "掩盖，隐藏",
+  "g": "Lesson12 P133",
+  "id": 55
+ },
+ {
+  "w": "repeal",
+  "m": "废除，撤销（法律）",
+  "g": "P72",
+  "id": 56
+ },
+ {
+  "w": "Rep",
+  "m": "众议员（Representative 的缩写/全称）",
+  "g": "P72",
+  "id": 57
+ },
+ {
+  "w": "rerun",
+  "m": "重现；重演",
+  "g": "P72",
+  "id": 58
+ },
+ {
+  "w": "returns",
+  "m": "选举结果统计或报告",
+  "g": "P72",
+  "id": 59
+ },
+ {
+  "w": "rout",
+  "m": "击溃，大败",
+  "g": "P72",
+  "id": 60
+ },
+ {
+  "w": "score",
+  "m": "取得成功",
+  "g": "P72",
+  "id": 61
+ },
+ {
+  "w": "swashbuckling",
+  "m": "虚张声势的；恃强凌弱的",
+  "g": "P72",
+  "id": 62
+ },
+ {
+  "w": "trail",
+  "m": "竞选游说行程",
+  "g": "P72",
+  "id": 63
+ },
+ {
+  "w": "paranoia",
+  "m": "偏执，多疑",
+  "g": "第 5 组",
+  "id": 64
+ },
+ {
+  "w": "paranoid",
+  "m": "有妄想狂倾向的；偏执的",
+  "g": "第 5 组",
+  "id": 65
+ },
+ {
+  "w": "pernicious",
+  "m": "有害的；恶性的，致命的",
+  "g": "第 5 组",
+  "id": 66
+ },
+ {
+  "w": "perpetrate",
+  "m": "做（坏事），实施",
+  "g": "第 5 组",
+  "id": 67
+ },
+ {
+  "w": "pervasive",
+  "m": "遍布的，弥漫的",
+  "g": "第 5 组",
+  "id": 68
+ },
+ {
+  "w": "postulate",
+  "m": "假定或认定……存在",
+  "g": "第 5 组",
+  "id": 69
+ },
+ {
+  "w": "proliferate",
+  "m": "激增，快速繁殖",
+  "g": "第 5 组",
+  "id": 70
+ },
+ {
+  "w": "protract",
+  "m": "延长（时间）",
+  "g": "第 5 组",
+  "id": 71
+ },
+ {
+  "w": "psyche",
+  "m": "精神，自我",
+  "g": "第 5 组",
+  "id": 72
+ },
+ {
+  "w": "reminiscent",
+  "m": "令人联想的；起提醒作用的",
+  "g": "第 5 组",
+  "id": 73
+ },
+ {
+  "w": "render",
+  "m": "表现，描绘",
+  "g": "第 5 组",
+  "id": 74
+ },
+ {
+  "w": "resentment",
+  "m": "憎恨；怨恨",
+  "g": "第 5 组",
+  "id": 75
+ },
+ {
+  "w": "respondent",
+  "m": "调查对象；答卷人",
+  "g": "第 5 组",
+  "id": 76
+ },
+ {
+  "w": "scenario",
+  "m": "可能出现的局面",
+  "g": "第 5 组",
+  "id": 77
+ },
+ {
+  "w": "self-fulfilling",
+  "m": "（预言等）本身会实现的",
+  "g": "第 5 组",
+  "id": 78
+ },
+ {
+  "w": "self-inflicted",
+  "m": "加于自身的",
+  "g": "第 5 组",
+  "id": 79
+ },
+ {
+  "w": "siege",
+  "m": "围困，围攻",
+  "g": "第 5 组",
+  "id": 80
+ },
+ {
+  "w": "solitary",
+  "m": "独自的，单独的",
+  "g": "第 5 组",
+  "id": 81
+ },
+ {
+  "w": "solidarity",
+  "m": "团结",
+  "g": "第 5 组",
+  "id": 82
+ },
+ {
+  "w": "spawn",
+  "m": "引起，酿成；使大量产生",
+  "g": "第 5 组",
+  "id": 83
+ },
+ {
+  "w": "standing",
+  "m": "地位；级别；名声",
+  "g": "Lesson12 P135",
+  "id": 84
+ },
+ {
+  "w": "status",
+  "m": "地位",
+  "g": "Lesson12 P135",
+  "id": 85
+ },
+ {
+  "w": "stereotype",
+  "m": "陈规；老套；刻板模式",
+  "g": "Lesson12 P135",
+  "id": 86
+ },
+ {
+  "w": "stimulate",
+  "m": "刺激，激发",
+  "g": "Lesson12 P135",
+  "id": 87
+ },
+ {
+  "w": "susceptible",
+  "m": "易受影响的；敏感的",
+  "g": "Lesson12 P135",
+  "id": 88
+ },
+ {
+  "w": "terminate",
+  "m": "终止，结束",
+  "g": "Lesson12 P135",
+  "id": 89
+ },
+ {
+  "w": "turban",
+  "m": "（穆斯林和锡克教徒用的）包头巾",
+  "g": "Lesson12 P135",
+  "id": 90
+ },
+ {
+  "w": "unleash",
+  "m": "发泄；发动；发出",
+  "g": "Lesson12 P135",
+  "id": 91
+ },
+ {
+  "w": "victimize",
+  "m": "使牺牲；使受害；使受骗",
+  "g": "Lesson12 P135",
+  "id": 92
+ },
+ {
+  "w": "villain",
+  "m": "恶棍，坏人",
+  "g": "Lesson12 P135",
+  "id": 93
+ },
+ {
+  "w": "abdicate",
+  "m": "退位",
+  "g": "第 7 组",
+  "id": 94
+ },
+ {
+  "w": "accession",
+  "m": "就职；继位",
+  "g": "第 7 组",
+  "id": 95
+ },
+ {
+  "w": "ambivalent",
+  "m": "矛盾的，有矛盾心理的",
+  "g": "第 7 组",
+  "id": 96
+ },
+ {
+  "w": "apathetic",
+  "m": "冷漠的，无动于衷的",
+  "g": "Lesson17 P195",
+  "id": 97
+ },
+ {
+  "w": "barge",
+  "m": "大型平底船",
+  "g": "Lesson17 P195",
+  "id": 98
+ },
+ {
+  "w": "behest",
+  "m": "命令，紧急请求",
+  "g": "Lesson17 P195",
+  "id": 99
+ },
+ {
+  "w": "borough",
+  "m": "市镇或区",
+  "g": "Lesson17 P195",
+  "id": 100
+ },
+ {
+  "w": "bunting",
+  "m": "小彩旗",
+  "g": "Lesson17 P195",
+  "id": 101
+ },
+ {
+  "w": "cement",
+  "m": "巩固，加强",
+  "g": "Lesson17 P195",
+  "id": 102
+ },
+ {
+  "w": "churl",
+  "m": "粗鄙的人",
+  "g": "Lesson17 P195",
+  "id": 103
+ },
+ {
+  "w": "cogent",
+  "m": "有说服力的",
+  "g": "Lesson17 P195",
+  "id": 104
+ },
+ {
+  "w": "commission",
+  "m": "委派，委托",
+  "g": "Lesson17 P195",
+  "id": 105
+ },
+ {
+  "w": "conspiracy",
+  "m": "阴谋集团",
+  "g": "Lesson17 P195",
+  "id": 106
+ },
+ {
+  "w": "construe",
+  "m": "理解，解读",
+  "g": "Lesson17 P195",
+  "id": 107
+ },
+ {
+  "w": "cynicism",
+  "m": "愤世嫉俗，冷嘲热讽",
+  "g": "Lesson17 P195",
+  "id": 108
+ },
+ {
+  "w": "demented",
+  "m": "疯狂的；精神错乱的",
+  "g": "Lesson17 P195",
+  "id": 109
+ },
+ {
+  "w": "deprivation",
+  "m": "丧失；剥夺",
+  "g": "Lesson17 P195",
+  "id": 110
+ },
+ {
+  "w": "dimwit",
+  "m": "傻瓜",
+  "g": "Lesson17 P195",
+  "id": 111
+ },
+ {
+  "w": "domesticity",
+  "m": "家庭生活；对家庭的喜爱",
+  "g": "Lesson17 P195",
+  "id": 112
+ },
+ {
+  "w": "discreetly",
+  "m": "谨慎地",
+  "g": "Lesson17 P195",
+  "id": 113
+ },
+ {
+  "w": "flotilla",
+  "m": "小型船队",
+  "g": "Lesson17 P195",
+  "id": 114
+ },
+ {
+  "w": "Google",
+  "m": "用谷歌搜索",
+  "g": "Lesson17 P195",
+  "id": 115
+ },
+ {
+  "w": "hereditary",
+  "m": "（地位、称号等）世袭的",
+  "g": "Lesson17 P195",
+  "id": 116
+ },
+ {
+  "w": "horrendous",
+  "m": "可怕的，令人恐惧的",
+  "g": "Lesson17 P195",
+  "id": 117
+ },
+ {
+  "w": "indoctrination",
+  "m": "教化，教导",
+  "g": "P196",
+  "id": 118
+ },
+ {
+  "w": "interregnum",
+  "m": "空位期；过渡时期",
+  "g": "P196",
+  "id": 119
+ },
+ {
+  "w": "Islington",
+  "m": "伊斯灵顿（伦敦一区）",
+  "g": "P196",
+  "id": 120
+ },
+ {
+  "w": "licentious",
+  "m": "淫荡无度的，放荡的",
+  "g": "P196",
+  "id": 121
+ },
+ {
+  "w": "mellow",
+  "m": "成熟的，老练的",
+  "g": "P196",
+  "id": 122
+ },
+ {
+  "w": "monarch",
+  "m": "君主，国王或女王",
+  "g": "P196",
+  "id": 123
+ },
+ {
+  "w": "monarchy",
+  "m": "君主制；君主世袭制",
+  "g": "P196",
+  "id": 124
+ },
+ {
+  "w": "objectionable",
+  "m": "令人反感的，有异议的",
+  "g": "P196",
+  "id": 125
+ },
+ {
+  "w": "obsessive",
+  "m": "执念深重的人",
+  "g": "P196",
+  "id": 126
+ },
+ {
+  "w": "placard",
+  "m": "海报，标语牌",
+  "g": "P196",
+  "id": 127
+ },
+ {
+  "w": "reign",
+  "m": "君主统治时期",
+  "g": "P196",
+  "id": 128
+ },
+ {
+  "w": "seclusion",
+  "m": "隐居",
+  "g": "P196",
+  "id": 129
+ },
+ {
+  "w": "spike",
+  "m": "急剧上升后骤降",
+  "g": "P196",
+  "id": 130
+ },
+ {
+  "w": "telly",
+  "m": "电视（英式口语）",
+  "g": "P196",
+  "id": 131
+ },
+ {
+  "w": "traction",
+  "m": "牵引，牵引力",
+  "g": "P196",
+  "id": 132
+ },
+ {
+  "w": "Thames",
+  "m": "泰晤士河",
+  "g": "P196",
+  "id": 133
+ },
+ {
+  "w": "traumatic",
+  "m": "造成创伤的",
+  "g": "P196",
+  "id": 134
+ },
+ {
+  "w": "turnaround",
+  "m": "好转，转变",
+  "g": "第 10 组",
+  "id": 135
+ },
+ {
+  "w": "typhoid",
+  "m": "伤寒(病)",
+  "g": "第 10 组",
+  "id": 136
+ },
+ {
+  "w": "urn",
+  "m": "咖啡壶，茶壶",
+  "g": "第 10 组",
+  "id": 137
+ },
+ {
+  "w": "usurpation",
+  "m": "篡夺，非法夺权",
+  "g": "第 10 组",
+  "id": 138
+ },
+ {
+  "w": "whinge",
+  "m": "唠叨，发牢骚",
+  "g": "第 10 组",
+  "id": 139
+ },
+ {
+  "w": "wobble",
+  "m": "摇晃，摇摆",
+  "g": "第 10 组",
+  "id": 140
+ }
+];
+const KEY = 'wordbank_v1';
+let S = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {stat:{}} }catch(e){ return {stat:{}} } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+function st(id){ return S.stat[id] || (S.stat[id] = {c:0,w:0}) }
+const GROUPS = [...new Set(WORDS.map(w=>w.g))];
+const norm = s => s.toLowerCase().replace(/[\s\-\.\/,]/g,'');
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]} return a };
+const pick = (arr,n) => shuffle(arr).slice(0,n);
+const TYPES = {en2cn:'英 → 中', cn2en:'中 → 英', spell:'拼写填空', listen:'听音拼写'};
+
+/* ---------- 状态统计 ---------- */
+function isMastered(id){ const s=st(id); return s.c>=2 && s.w===0 }
+function isWrongWord(id){ return st(id).w > 0 }
+function refreshTop(){
+  const m = WORDS.filter(w=>isMastered(w.id)).length;
+  const wr = WORDS.filter(w=>isWrongWord(w.id)).length;
+  let c=0,t=0; WORDS.forEach(w=>{c+=st(w.id).c;t+=st(w.id).c+st(w.id).w});
+  document.getElementById('s-master').textContent = m;
+  document.getElementById('s-wrong').textContent = wr;
+  document.getElementById('s-acc').textContent = t? Math.round(c/t*100)+'%':'--';
+  document.getElementById('totalN').textContent = WORDS.length;
+  document.getElementById('subtitle').textContent = GROUPS.length + ' 个分组 · 覆盖教材 Lesson 7 / 12 / 17';
+}
+function speak(t){
+  try{ const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=.85;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+
+/* ---------- Tab 切换 ---------- */
+const tabs = {home:'tab-home', quiz:'tab-quiz', result:'tab-result', flash:'tab-flash', list:'tab-list', stat:'tab-stat'};
+function show(name){
+  Object.values(tabs).forEach(id=>document.getElementById(id).classList.add('hide'));
+  document.getElementById(tabs[name]).classList.remove('hide');
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.tab===name || (name!=='home'&&name!=='quiz'&&name!=='result'&&b.dataset.tab===name)));
+  if(name==='list') renderList();
+  if(name==='stat') renderStat();
+  if(name==='flash' && !flash.state.init) initFlash();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); show(b.dataset.tab);
+});
+
+/* ---------- 设置 ---------- */
+const cfg = {scope:'all', groups:new Set(GROUPS), type:'mix', n:20};
+document.querySelectorAll('[data-scope]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-scope]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); cfg.scope=b.dataset.scope;
+  document.getElementById('groupBox').classList.toggle('hide', cfg.scope!=='group');
+  updateScopeInfo();
+});
+document.querySelectorAll('[data-type]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-type]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); cfg.type=b.dataset.type;
+});
+document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-n]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); cfg.n=+b.dataset.n;
+});
+const gb = document.getElementById('groupBox');
+GROUPS.forEach(g=>{
+  const b=document.createElement('button'); b.className='opt on'; b.textContent=g;
+  b.onclick=()=>{ b.classList.toggle('on'); cfg.groups.has(g)?cfg.groups.delete(g):cfg.groups.add(g); updateScopeInfo() };
+  gb.appendChild(b);
+});
+function pool(){
+  if(cfg.scope==='wrong') return WORDS.filter(w=>isWrongWord(w.id));
+  if(cfg.scope==='new') return WORDS.filter(w=>!isMastered(w.id));
+  if(cfg.scope==='group') return WORDS.filter(w=>cfg.groups.has(w.g));
+  return WORDS.slice();
+}
+function updateScopeInfo(){
+  const n=pool().length;
+  const el=document.getElementById('scopeInfo');
+  el.textContent = '本次可选单词：'+n+' 个' + (n?'':'（换个范围试试）');
+  document.getElementById('startBtn').disabled = n===0;
+}
+updateScopeInfo();
+
+/* ---------- 出题 ---------- */
+function distractWords(ans){
+  const others = WORDS.filter(w=>w.id!==ans.id);
+  const sameLen = others.filter(w=>Math.abs(w.w.length-ans.w.length)<=2);
+  const from = sameLen.length>=3 ? sameLen : others;
+  return pick(from,3).map(w=>w.w);
+}
+function distractMeanings(ans){
+  const others = WORDS.filter(w=>w.id!==ans.id);
+  const chars = [...new Set(ans.m.replace(/[（）()\s，,；;、]/g,''))];
+  const scored = others.map(w=>{
+    const mc=[...w.m.replace(/[（）()\s，,；;、]/g,'')];
+    const share = mc.filter(c=>chars.includes(c)).length;
+    return {w, share};
+  });
+  scored.sort((a,b)=>b.share-a.share);
+  const topPool = scored.slice(0, Math.max(8, Math.min(24, scored.length)));
+  return pick(topPool,3).map(o=>o.w.m);
+}
+function makeQ(word, type){
+  if(type==='mix'){
+    const bag=['en2cn','cn2en','spell'];
+    if(cfg.type==='mix') type = bag[Math.random()*bag.length|0];
+  }
+  const q = {word, type, done:false};
+  if(type==='en2cn'){
+    q.stem = word.w; q.hint='选出正确的中文释义';
+    q.options = shuffle([word.m, ...distractMeanings(word)]);
+  } else if(type==='cn2en'){
+    q.stem = word.m; q.stemSmall=true; q.hint='选出对应的英文单词';
+    q.options = shuffle([word.w, ...distractWords(word)]);
+  } else if(type==='spell'){
+    q.stem = word.m; q.stemSmall=true;
+    q.hint = '首字母 '+word.w[0]+' · 共 '+word.w.replace(/[^a-zA-Z]/g,'').length+' 个字母';
+  } else if(type==='listen'){
+    q.stem = '🔊 点击播放'; q.stemSmall=true;
+    q.hint = '听发音，拼出单词（可反复播放）';
+  }
+  q.answer = (type==='en2cn') ? word.m : word.w;
+  return q;
+}
+
+/* ---------- 答题流程 ---------- */
+let Q = {list:[], i:0, right:0, wrongs:[], t0:0};
+document.getElementById('startBtn').onclick = () => {
+  const p = pool(); if(!p.length) return;
+  let n = Math.min(cfg.n, p.length);
+  const list = pick(p, n).map(w=>makeQ(w, cfg.type));
+  Q = {list, i:0, right:0, wrongs:[], t0:Date.now()};
+  show('quiz'); renderQ();
+};
+document.getElementById('quitBtn').onclick = () => finish();
+
+function renderQ(){
+  const q = Q.list[Q.i]; if(!q) return finish();
+  document.getElementById('qbar').style.width = (Q.i/Q.list.length*100)+'%';
+  document.getElementById('qnum').textContent = '第 '+(Q.i+1)+' / '+Q.list.length+' 题';
+  document.getElementById('qscore').textContent = '✓ '+Q.right+'   ✗ '+Q.wrongs.length;
+  document.getElementById('qtype').textContent = TYPES[q.type];
+  const st_ = document.getElementById('stem');
+  st_.textContent = q.stem; st_.className = 'stem'+(q.stemSmall?' small':'');
+  document.getElementById('hint').textContent = q.hint||'';
+  const fb=document.getElementById('fb'); fb.className='fb'; fb.innerHTML='';
+  document.getElementById('after').classList.add('hide');
+  const area=document.getElementById('area'); area.innerHTML='';
+
+  if(q.type==='en2cn' || q.type==='cn2en'){
+    const box=document.createElement('div'); box.className='options';
+    q.options.forEach((o,idx)=>{
+      const b=document.createElement('button'); b.className='option';
+      b.innerHTML='<span class="k">'+(idx+1)+'</span><span>'+o+'</span>';
+      b.onclick=()=>answer(q,o,b);
+      box.appendChild(b);
+    });
+    area.appendChild(box);
+  } else {
+    if(q.type==='listen'){
+      const b=document.createElement('button'); b.className='speak'; b.textContent='🔊 再听一次';
+      b.style.margin='0 auto 10px'; b.style.display='block';
+      b.onclick=()=>speak(q.word.w); area.appendChild(b);
+      setTimeout(()=>speak(q.word.w),150);
+    }
+    const inp=document.createElement('input'); inp.className='answerline'; inp.placeholder='输入单词后回车';
+    inp.autocomplete='off'; inp.spellcheck=false;
+    const btn=document.createElement('button'); btn.className='btn-main'; btn.textContent='提交';
+    const go=()=>{ if(q.done) return; answer(q, inp.value.trim(), inp) };
+    btn.onclick=go; inp.onkeydown=e=>{ if(e.key==='Enter') go() };
+    area.appendChild(inp); area.appendChild(btn);
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+function answer(q, val, el){
+  if(q.done) return; q.done=true;
+  const ok = (q.type==='en2cn') ? (val===q.answer) : (norm(val)===norm(q.answer));
+  const s = st(q.word.id);
+  ok ? s.c++ : s.w++; save();
+  if(ok) Q.right++; else Q.wrongs.push(q.word);
+  const fb=document.getElementById('fb');
+  fb.className='fb show '+(ok?'ok':'bad');
+  fb.innerHTML = (ok?'✓ 正确！　':'✗ 正确答案：') +
+    '<span class="big">'+q.word.w+'</span> —— '+q.word.m +
+    (ok?'':'<br><span style="font-size:13px">你答的是：'+(val||'(空)')+'</span>');
+  if(q.type==='en2cn'||q.type==='cn2en'){
+    document.querySelectorAll('#area .option').forEach(b=>{
+      b.classList.add('done');
+      const t=b.querySelectorAll('span')[1].textContent;
+      if(t===q.answer) b.classList.add('right');
+      else if(!ok && t===val) b.classList.add('wrong');
+    });
+  } else { if(el) el.disabled=true; if(!ok){ const t=document.createElement('div'); } }
+  document.getElementById('after').classList.remove('hide');
+  refreshTop();
+}
+document.getElementById('nextBtn').onclick = ()=>{ Q.i++; renderQ() };
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('tab-quiz').classList.contains('hide')) return;
+  if(e.key==='Enter' && Q.list[Q.i] && Q.list[Q.i].done){ Q.i++; renderQ(); return; }
+  const n=parseInt(e.key,10);
+  if(n>=1&&n<=4){
+    const opts=document.querySelectorAll('#area .option');
+    if(opts[n-1]) opts[n-1].click();
+  }
+});
+
+function finish(){
+  const total=Q.list.length, right=Q.right;
+  document.getElementById('rscore').textContent = Math.round(right/total*100);
+  document.getElementById('rtotal').textContent = total;
+  document.getElementById('rright').textContent = right;
+  document.getElementById('racc').textContent = Math.round(right/total*100)+'%';
+  const box=document.getElementById('rwrong'); box.innerHTML='';
+  if(Q.wrongs.length){
+    const h=document.createElement('div'); h.style.marginTop='18px'; h.style.fontWeight='600';
+    h.textContent='错题回顾（'+Q.wrongs.length+'）'; box.appendChild(h);
+    Q.wrongs.forEach(w=>{
+      const d=document.createElement('div'); d.className='wrong-item';
+      d.innerHTML='<span class="w">'+w.w+'</span> —— <span class="m">'+w.m+'</span>　<span style="font-size:12px;color:#9ca3af">'+w.g+'</span>';
+      box.appendChild(d);
+    });
+  } else {
+    box.innerHTML='<div style="text-align:center;margin-top:16px;color:#16a34a">全对，这组稳了 🎉</div>';
+  }
+  show('result');
+}
+document.getElementById('ragain').onclick = ()=>document.getElementById('startBtn').click();
+document.getElementById('rhome').onclick = ()=>show('home');
+document.getElementById('ronlywrong').onclick = ()=>{
+  if(!Q.wrongs.length) return;
+  Q = {list: shuffle(Q.wrongs).map(w=>makeQ(w,cfg.type)), i:0, right:0, wrongs:[], t0:Date.now()};
+  show('quiz'); renderQ();
+};
+
+/* ---------- 闪卡 ---------- */
+const flash = {list:[], i:0, side:0, state:{init:false}};
+function initFlash(){
+  const box=document.getElementById('flashGroups'); box.innerHTML='';
+  GROUPS.forEach(g=>{
+    const b=document.createElement('button'); b.className='opt on'; b.textContent=g;
+    b.onclick=()=>{ b.classList.toggle('on'); flash.state[g]=!flash.state[g]; reloadFlash() };
+    flash.state[g]=true; box.appendChild(b);
+  });
+  reloadFlash(); flash.state.init=true;
+}
+function reloadFlash(){
+  const sel = GROUPS.filter(g=>flash.state[g]);
+  flash.list = shuffle(WORDS.filter(w=>sel.includes(w.g)));
+  flash.i=0; flash.side=0; drawFlash();
+}
+function drawFlash(){
+  const w=flash.list[flash.i]; if(!w){ document.getElementById('fw').textContent='（无单词）'; return }
+  const c=document.getElementById('fcard');
+  document.getElementById('fw').className = flash.side? 'fm':'fw';
+  document.getElementById('fw').textContent = flash.side? w.m : w.w;
+  const tip = c.querySelector('.tip');
+  tip.textContent = (flash.side?'（点击回到单词）':'点击翻面看释义')+'　·　'+w.g;
+  document.getElementById('finfo').textContent = (flash.i+1)+' / '+flash.list.length+
+    '　✓'+st(w.id).c+' ✗'+st(w.id).w;
+}
+document.getElementById('fcard').onclick = ()=>{ flash.side=!flash.side; drawFlash() };
+document.getElementById('fprev').onclick = ()=>{ flash.i=(flash.i-1+flash.list.length)%flash.list.length; flash.side=0; drawFlash() };
+document.getElementById('fnext').onclick = ()=>{ flash.i=(flash.i+1)%flash.list.length; flash.side=0; drawFlash() };
+document.getElementById('fspeak').onclick = ()=>{ const w=flash.list[flash.i]; if(w) speak(w.w) };
+document.getElementById('fknow').onclick = ()=>{ const w=flash.list[flash.i]; if(w){st(w.id).c++;save();refreshTop()} flash.i=(flash.i+1)%flash.list.length; flash.side=0; drawFlash() };
+document.getElementById('funknow').onclick = ()=>{ const w=flash.list[flash.i]; if(w){st(w.id).w++;save();refreshTop()} flash.side=1; drawFlash() };
+
+/* ---------- 词表 ---------- */
+function renderList(){
+  const kw = (document.getElementById('search').value||'').trim().toLowerCase();
+  const box=document.getElementById('listBox'); box.innerHTML='';
+  GROUPS.forEach(g=>{
+    const ws = WORDS.filter(w=>w.g===g && (!kw || w.w.toLowerCase().includes(kw) || w.m.includes(kw)));
+    if(!ws.length) return;
+    const t=document.createElement('div'); t.className='gtitle';
+    const done=ws.filter(w=>isMastered(w.id)).length;
+    t.innerHTML='<span>'+g+'</span><span>'+done+' / '+ws.length+' 已掌握</span>';
+    box.appendChild(t);
+    const tb=document.createElement('table'); tb.className='wt';
+    ws.forEach(w=>{
+      const s=st(w.id);
+      const cls = s.w>0? 'b' : (isMastered(w.id)?'m':'n');
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td class="w"><span class="dot '+cls+'"></span>'+w.w+'</td><td>'+w.m+'</td>';
+      tr.style.cursor='pointer'; tr.onclick=()=>speak(w.w);
+      tb.appendChild(tr);
+    });
+    box.appendChild(tb);
+  });
+  if(!box.innerHTML) box.innerHTML='<div class="sub">没有匹配的单词</div>';
+}
+document.getElementById('search').oninput = renderList;
+
+/* ---------- 统计 ---------- */
+function renderStat(){
+  const box=document.getElementById('statBox'); box.innerHTML='';
+  GROUPS.forEach(g=>{
+    const ws=WORDS.filter(w=>w.g===g);
+    const m=ws.filter(w=>isMastered(w.id)).length;
+    const pct=Math.round(m/ws.length*100);
+    const d=document.createElement('div'); d.className='stat-row';
+    d.innerHTML='<span class="nm">'+g+'</span><span class="pb"><span class="pbar"><i style="width:'+pct+'%"></i></span></span><span class="vv">'+m+'/'+ws.length+'</span>';
+    box.appendChild(d);
+  });
+  const tw=document.getElementById('topWrong'); tw.innerHTML='';
+  const bad=WORDS.filter(w=>st(w.id).w>0).sort((a,b)=>st(b.id).w-st(a.id).w).slice(0,15);
+  if(!bad.length) tw.innerHTML='<div class="sub">还没有错题记录，去做两组练习吧。</div>';
+  bad.forEach(w=>{
+    const d=document.createElement('div'); d.className='wrong-item';
+    d.innerHTML='<span class="w">'+w.w+'</span> —— <span class="m">'+w.m+'</span>　<span style="font-size:12px;color:#dc2626">错 '+st(w.id).w+' 次</span>';
+    tw.appendChild(d);
+  });
+}
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('确定清空所有学习记录？此操作不可撤销。')){ S={stat:{}}; save(); refreshTop(); renderStat(); }
+};
+document.getElementById('exportBtn').onclick = ()=>{
+  const bad=WORDS.filter(w=>st(w.id).w>0);
+  const txt=bad.map(w=>w.w+' —— '+w.m+'（错 '+st(w.id).w+' 次）').join('\n') || '（暂无错题）';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));
+  a.download='错词表.txt'; a.click();
+};
+
+refreshTop();
+</script>
+</body>
+</html>
